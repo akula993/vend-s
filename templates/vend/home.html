@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+{% block content %}
+    <div class="row">
+        <table class="table">
+            <thead>
+            <tr>
+                <th scope="col">Адрес</th>
+                <th scope="col">Расходы</th>
+                <th scope="col">Доход</th>
+                <th scope="col">Итого</th>
+                <th scope="col">Оплата (нал - без нал)</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for addres in address %}
+                <tr>
+                    <th scope="row"><a href="{{ url }}">{{ addres.name }}</a></th>
+                    <td>{{ addres.to_rent }}</td>
+                    <td>{{ addres.get_sum }}</td>
+                    <td>{{ addres.get_sell }}</td>
+                    <td>{{ addres.payment }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endblock %}
