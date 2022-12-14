@@ -1,16 +1,16 @@
 from django.db import models
-from django.db.models import Sum
+from django.db.models import Sum, Count
 from django.urls import reverse
 from django.utils import timezone
 
 
-class Addres(models.Model):
+class Address(models.Model):
     PAYMENT = (
         ('nal', "Наличный расчет"),
         ('bez', "Безналичный расчет"),
     )
     name = models.CharField("Адрес", max_length=255)
-    slug = models.SlugField('URL', unique=True, blank=True,null=True)
+    slug = models.SlugField('URL', unique=True, blank=True, null=True)
     to_rent = models.DecimalField('Аренда', max_digits=10, decimal_places=2, blank=True, null=True, )
     publish = models.DateTimeField(default=timezone.now, blank=True, null=True, )
     created = models.DateTimeField(auto_now_add=True)
@@ -20,19 +20,37 @@ class Addres(models.Model):
     def __str__(self):
         return self.name
 
-    def get_sum(self):
-        sum_number = Counter.objects.aggregate(total_price=Sum('number'))['total_price']
-        n = sum_number * 10
-        return n
+    # def get_all_sum(self):
+    #     sum_number = Device.get_sum()
 
-    def get_sell(self):
-        sum_number = Counter.objects.aggregate(total_price=Sum('number'))['total_price']
-        sum_rent = self.to_rent
-        s = sum_number - sum_rent
-        return s
+    # s = sum_number.
+    # (total_price=Sum('number'))['total_price']
+    # n = sum_number * 10
+    # return s
+
+    # def get_sell(self):
+    #     sum_number = Counter.objects.aggregate(total_price=Sum('number'))['total_price']
+    #     # print(sum_number)
+    #
+    #     # sum_rent = self.to_rent
+    #     # print(sum_rent)
+    #     # s = sum_number - sum_rent
+    #     # print(s)
+    #     # return s/
+
+    @classmethod
+    def get_default_pk(cls):
+        obj, created = cls.objects.get_or_create(name='Без адреса')
+        return obj.pk
+
+    class Meta:
+        verbose_name = 'Адрес'
+        verbose_name_plural = 'Адреса'
+
 
 class Device(models.Model):
-    address = models.ForeignKey(Addres, on_delete=models.PROTECT, related_name='addres')
+    address = models.ForeignKey(Address, on_delete=models.SET_DEFAULT, related_name='device',
+                                default=Address.get_default_pk, verbose_name="Адреса")
     name = models.CharField("Название", blank=True, null=True, max_length=150, default='Кран')
 
     # def get_absolute_url(self):
@@ -40,25 +58,69 @@ class Device(models.Model):
     def __str__(self):
         return f'{self.address.name} | {self.name}'
 
-    def get_absolute_url(self):
-        return reverse('address', kwargs={'slug_neme': self.address.slug})
-    # def get_absolute_url(self):
-    #     return reverse('device', kwargs={'id': self.id, 'name': self.name})
+    # queryset = (
+    #     Counter
+    #     .objects
+    #     .values('category__name')
+    #     .annotate(name=F('category__name'))
+    #     .annotate(cnt=Count('id'))
+    #     .order_by('category__name')
+    #     .values('name', 'cnt')
+    # )
 
-class Counter(models.Model):
-    device = models.ForeignKey(Device, on_delete=models.PROTECT, related_name='counter')
+
+
+    class Meta:
+        verbose_name = 'Аппарат'
+        verbose_name_plural = 'Аппараты'
+
+    def get_absolute_url(self):
+        return reverse('address', kwargs={'slug_name': self.address.slug})
+
+
+class Sensor(models.Model):
+    device = models.ForeignKey(Device, on_delete=models.PROTECT)
     month = models.DateTimeField('Дата снятия счетчика', auto_now=True)
     number = models.IntegerField(verbose_name='Счетчик', default=0)
-    expenditure = models.IntegerField(verbose_name='Раход', default=0)
-    toys = models.DecimalField('Игрушки', max_digits=10, decimal_places=2, default=0)
-    service = models.DecimalField('обслуживание', max_digits=10, decimal_places=2, default=0)
-    service_description = models.TextField('обслуживание описание', blank=True, )
-    petrol = models.DecimalField('бензин', max_digits=10, decimal_places=2, default=0)
-    other = models.DecimalField('прочие', max_digits=10, decimal_places=2, default=0)
-    other_description = models.TextField('прочие описание', blank=True)
-
+    def get_sum(self):
+        sum_number = Device.objects.aggregate(total_price=Count('counter'))['total_price']
+        n = sum_number * 10
+        return n
     def __str__(self):
         return f'{self.device.address} | {self.device.name}'
 
     def get_absolute_url(self):
         return reverse('home', kwargs={'id': self.id, 'name': self.month})
+
+    class Meta:
+        verbose_name = 'Счетчик'
+        verbose_name_plural = 'Счетчики'
+
+
+class Expenditure(models.Model):
+    device = models.ForeignKey(Device, on_delete=models.CASCADE, related_name='expenditure', verbose_name='Аппарат')
+    toys = models.DecimalField('Игрушки', max_digits=10, decimal_places=2, default=0)
+    petrol = models.DecimalField('бензин', max_digits=10, decimal_places=2, default=0)
+    service = models.DecimalField('обслуживание', max_digits=10, decimal_places=2, default=0)
+    service_description = models.TextField('обслуживание описание', blank=True, )
+
+    class Meta:
+        verbose_name = 'Раход'
+        verbose_name_plural = 'Раходы'
+
+    def __str__(self):
+        return f'Аппарат: {self.device.name} | Игрушки: {self.toys} | бензин: {self.toys} | обслуживание: {self.toys}'
+
+
+class AddOptions(models.Model):
+    device = models.ForeignKey(Device, on_delete=models.CASCADE, related_name='addoptions')
+
+    other = models.DecimalField('прочие', max_digits=10, decimal_places=2, default=0)
+    other_description = models.TextField('прочие описание', blank=True)
+
+    class Meta:
+        verbose_name = 'Дополнительная опции'
+        verbose_name_plural = 'Дополнительные опции'
+
+    def __str__(self):
+        return self.device.name

@@ -1,12 +1,11 @@
 from django.shortcuts import render
 
-from vend.models import Addres, Device
+from vend.models import Address, Device, Sensor
 
 
 def home(request):
-    address = Addres.objects.all()
-    url = Device.get_absolute_url()
-    print(address)
+    address = Sensor.objects.all()
+    url = Device.objects.all()
     context = {
         'address': address,
         'url': url,

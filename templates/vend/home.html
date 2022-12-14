@@ -12,15 +12,23 @@
             </tr>
             </thead>
             <tbody>
-            {% for addres in address %}
+            {% for addres in url %}
                 <tr>
-                    <th scope="row"><a href="{{ url }}">{{ addres.name }}</a></th>
-                    <td>{{ addres.to_rent }}</td>
-                    <td>{{ addres.get_sum }}</td>
-                    <td>{{ addres.get_sell }}</td>
-                    <td>{{ addres.payment }}</td>
+                    <th scope="row"><a href="{{ url }}">{{ addres.address.name }}</a></th>
+                    <td>{{ addres.address.to_rent }}</td>
+                    <td>{{ addres.address.get_sell }}</td>
+
+
+                    <td>{{ addres.address.payment }}</td>
                 </tr>
             {% endfor %}
+            {% for a in address %}
+
+                        <td>{{ a.get_sum }}</td>
+                    {% endfor %}
+            {#            {% if address %}#}
+            {##}
+            {#            {% endif %}#}
             </tbody>
         </table>
     </div>
