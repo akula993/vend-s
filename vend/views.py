@@ -4,7 +4,7 @@ from vend.models import Address, Device, Sensor
 
 
 def home(request):
-    address = Sensor.objects.all()
+    address = Address.objects.all()
     devices = Device.objects.all()
     context = {
         'address': address,

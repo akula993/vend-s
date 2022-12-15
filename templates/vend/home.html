@@ -12,15 +12,21 @@
             </tr>
             </thead>
             <tbody>
-            {% for device in devices %}
+            {% for addres in address %}
                 <tr>
-                    <th scope="row"><a href="{{ url }}">{{ device.name }}</a></th>
-                    <td>{{ device.address.to_rent }}</td>
-                    <td>{{ device.get_sum }}</td>
-                    <td>{{ device.get_sell }}</td>
+                    <th scope="row"><a href="{{ url }}">{{ addres.name }}</a></th>
+                    <td>{{ addres.to_rent }}</td>
+                    {% for i in addres.device.all %}
+                    <td> {{ i.get_sum }}</td>
+                    <td>{{ i.get_sell }}</td>
+                    {% endfor %}
                     <td>{{ device.address.payment }}</td>
                 </tr>
+
+                {{ addres.get_sum_all }}
+
             {% endfor %}
+
             </tbody>
         </table>
     </div>

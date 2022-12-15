@@ -2,11 +2,17 @@ from django.contrib import admin
 
 from vend.models import Device, Address, Sensor, Expenditure, AddOptions
 
+class De(admin.TabularInline):
+    model = Device
+class Se(admin.TabularInline):
+    model = Sensor
+    extra = 0
+
 
 @admin.register(Address)
 class AddressAdmin(admin.ModelAdmin):
     # exclude = ('slug',)
-
+    inlines = [De,]
     prepopulated_fields = {'slug': ('name',)}
     # readonly_fields = ('slug',)
     save_as = True
@@ -19,6 +25,7 @@ class SensorAdmin(admin.ModelAdmin):
 @admin.register(Device)
 class DeviceAdmin(admin.ModelAdmin):
     save_as = True
+    inlines = [Se,]
 
 @admin.register(Expenditure)
 class ExpenditureAdmin(admin.ModelAdmin):

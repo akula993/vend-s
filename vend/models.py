@@ -47,6 +47,30 @@ class Address(models.Model):
         verbose_name = 'Адрес'
         verbose_name_plural = 'Адреса'
 
+    def get_sum_all(self):
+        address_sum = Address.objects.get(name=self.name)
+        a = address_sum.device.all()
+        if address_sum.device.all() and not None:
+            print(a[1:1])
+            for i in a:
+                device_sum = a.get(name=self.name)
+                print(device_sum, 'Адрес')
+
+                try:
+                    last, pre_last = device_sum.sensor_set.order_by('-month')[:2]
+                    sum_number = (last.number - pre_last.number) * 10
+                except ValueError:
+                    try:
+                        last, pre_last = device_sum.sensor_set.last(), 0
+                        sum_number = (last.number) * 10
+                    except AttributeError:
+                        sum_number = 0
+            sum_number = 0
+        else:
+            print('Нет нечего')
+            sum_number =0
+        return sum_number
+
 
 class Device(models.Model):
     address = models.ForeignKey(Address, on_delete=models.SET_DEFAULT, related_name='device',
