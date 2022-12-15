@@ -4,7 +4,7 @@
         <table class="table">
             <thead>
             <tr>
-                <th scope="col">Адрес</th>
+                <th scope="col">Аппарат</th>
                 <th scope="col">Расходы</th>
                 <th scope="col">Доход</th>
                 <th scope="col">Итого</th>
@@ -12,23 +12,15 @@
             </tr>
             </thead>
             <tbody>
-            {% for addres in url %}
+            {% for device in devices %}
                 <tr>
-                    <th scope="row"><a href="{{ url }}">{{ addres.address.name }}</a></th>
-                    <td>{{ addres.address.to_rent }}</td>
-                    <td>{{ addres.address.get_sell }}</td>
-
-
-                    <td>{{ addres.address.payment }}</td>
+                    <th scope="row"><a href="{{ url }}">{{ device.name }}</a></th>
+                    <td>{{ device.address.to_rent }}</td>
+                    <td>{{ device.get_sum }}</td>
+                    <td>{{ device.get_sell }}</td>
+                    <td>{{ device.address.payment }}</td>
                 </tr>
             {% endfor %}
-            {% for a in address %}
-
-                        <td>{{ a.get_sum }}</td>
-                    {% endfor %}
-            {#            {% if address %}#}
-            {##}
-            {#            {% endif %}#}
             </tbody>
         </table>
     </div>

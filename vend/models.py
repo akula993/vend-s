@@ -1,5 +1,5 @@
 from django.db import models
-from django.db.models import Sum, Count
+from django.db.models import Sum, Count, Max
 from django.urls import reverse
 from django.utils import timezone
 
@@ -51,7 +51,37 @@ class Address(models.Model):
 class Device(models.Model):
     address = models.ForeignKey(Address, on_delete=models.SET_DEFAULT, related_name='device',
                                 default=Address.get_default_pk, verbose_name="Адреса")
-    name = models.CharField("Название", blank=True, null=True, max_length=150, default='Кран')
+    name = models.CharField("Название", blank=True, max_length=150, default='')
+
+    def get_sum(self):
+        device_sum = Device.objects.get(name=self.name)
+        # last, pre_last = device_sum.sensor_set.order_by('-month')[:2]
+        # # sum_number = device_sum.sensor.aggregate(total_price=Max('number', ))['total_price']
+        # sum_number = (last.number - pre_last.number) * 10
+        try:
+            last, pre_last = device_sum.sensor_set.order_by('-month')[:2]
+            sum_number = (last.number - pre_last.number) * 10
+        except ValueError:
+            try:
+                last, pre_last = device_sum.sensor_set.last(), 0
+                sum_number = (last.number) * 10
+            except AttributeError:
+                sum_number = 0
+        return sum_number
+
+    def get_sell(self):
+        device_sum = Device.objects.get(name=self.name)
+        try:
+            last, pre_last = device_sum.sensor_set.order_by('-month')[:2]
+            sum = (last.number - pre_last.number) * 10
+        except ValueError:
+            try:
+                last, pre_last = device_sum.sensor_set.last(), 0
+                sum = (last.number) * 10
+            except AttributeError:
+                sum = 0
+        sum_number = sum - self.address.to_rent
+        return sum_number
 
     # def get_absolute_url(self):
     #     return reverse('device', kwargs={'post_id': self.pk, 'slug_address': self.address.slug})

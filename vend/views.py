@@ -5,10 +5,10 @@ from vend.models import Address, Device, Sensor
 
 def home(request):
     address = Sensor.objects.all()
-    url = Device.objects.all()
+    devices = Device.objects.all()
     context = {
         'address': address,
-        'url': url,
+        'devices': devices,
     }
     return render(request, 'vend/home.html', context)
 
