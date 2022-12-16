@@ -16,14 +16,11 @@
                 <tr>
                     <th scope="row"><a href="{{ url }}">{{ addres.name }}</a></th>
                     <td>{{ addres.to_rent }}</td>
-                    {% for i in addres.device.all %}
-                    <td> {{ i.get_sum }}</td>
-                    <td>{{ i.get_sell }}</td>
-                    {% endfor %}
+                    <td> {{ addres.get_sum_all }}</td>
+                    <td>{{ addres.get_sum_all_sell }}</td>
                     <td>{{ device.address.payment }}</td>
                 </tr>
 
-                {{ addres.get_sum_all }}
 
             {% endfor %}
 

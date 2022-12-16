@@ -49,27 +49,68 @@ class Address(models.Model):
 
     def get_sum_all(self):
         address_sum = Address.objects.get(name=self.name)
-        a = address_sum.device.all()
-        if address_sum.device.all() and not None:
-            print(a[1:1])
-            for i in a:
-                device_sum = a.get(name=self.name)
-                print(device_sum, 'Адрес')
-
+        device_sum = address_sum.device.all()
+        if device_sum and not None:
+            sum_number_list = []
+            for i in device_sum:
                 try:
-                    last, pre_last = device_sum.sensor_set.order_by('-month')[:2]
-                    sum_number = (last.number - pre_last.number) * 10
+                    last, pre_last = i.sensor_set.order_by('-month')[:2]
+                    number_list = (last.number - pre_last.number) * 10
+                    sum_number_list.append(number_list)
                 except ValueError:
                     try:
-                        last, pre_last = device_sum.sensor_set.last(), 0
-                        sum_number = (last.number) * 10
+                        last, pre_last = i.sensor_set.last(), 0
+                        number_list = (last.number) * 10
+                        sum_number_list.append(number_list)
                     except AttributeError:
-                        sum_number = 0
-            sum_number = 0
+                        number_list = 0
+                # print(sum(sum_number), sum_number )
+                sum_number_list.append(number_list)
+            # print(sum(sum_number), sum_number )
+            sum_number = sum(sum_number_list) // 2
         else:
-            print('Нет нечего')
-            sum_number =0
+            sum_number = 0
         return sum_number
+
+    def get_sum_all_sell(self):
+        address_sum = Address.objects.get(name=self.name)
+        device_sum = address_sum.device.all()
+        if device_sum and not None:
+            sum_number_list = []
+            for dev_sum in device_sum:
+                current_datetime = timezone.now()
+                list_date = dev_sum.sensor_set.filter(month__year=current_datetime.year, month__month=current_datetime.month)
+                device_list = []
+                for add_list in list_date:
+                    device_list.append(add_list)
+                sum_aq = []
+                for item in device_list:
+                    sum_aq.append(item.number)
+
+                sum_number = sum(sum_aq)
+                print(sum_number, 1)
+            # sum_number = sum(sum_number_list) // 2
+            # sum_number = sum_number - self.to_rent
+
+        else:
+            sum_number = 0
+        return sum_number
+
+
+# for i in device_sum:
+#     current_datetime = timezone.now()
+#     l = i.sensor_set.filter(month__year=current_datetime.year, month__month=current_datetime.month)
+#     # print(l, 'Проверка', type(l))
+#     aq = []
+#     for a in l:
+#         aq.append(a)
+#         sum_aq = []+aq
+#         for i in aq:
+#             sum_aq.append(i)
+#             aaa = [sum_aq]
+#     print(aaa)
+
+
 
 
 class Device(models.Model):
@@ -134,7 +175,7 @@ class Device(models.Model):
 
 class Sensor(models.Model):
     device = models.ForeignKey(Device, on_delete=models.PROTECT)
-    month = models.DateTimeField('Дата снятия счетчика', auto_now=True)
+    month = models.DateTimeField('Дата снятия счетчика', default=timezone.now())
     number = models.IntegerField(verbose_name='Счетчик', default=0)
     def get_sum(self):
         sum_number = Device.objects.aggregate(total_price=Count('counter'))['total_price']
