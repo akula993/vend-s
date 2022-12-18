@@ -10,33 +10,18 @@ class Address(models.Model):
         ('bez', "Безналичный расчет"),
     )
     name = models.CharField("Адрес", max_length=255)
-    slug = models.SlugField('URL', unique=True, blank=True, null=True)
+    slug = models.SlugField('URL', max_length=255, unique=True, blank=True, null=True)
     to_rent = models.DecimalField('Аренда', max_digits=10, decimal_places=2, blank=True, null=True, )
     publish = models.DateTimeField(default=timezone.now, blank=True, null=True, )
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
     payment = models.CharField('Оплата', max_length=3, choices=PAYMENT, default='bez')
 
+    def get_absolute_url(self):
+        return reverse('address', kwargs={'slug': self.slug})
     def __str__(self):
         return self.name
 
-    # def get_all_sum(self):
-    #     sum_number = Device.get_sum()
-
-    # s = sum_number.
-    # (total_price=Sum('number'))['total_price']
-    # n = sum_number * 10
-    # return s
-
-    # def get_sell(self):
-    #     sum_number = Counter.objects.aggregate(total_price=Sum('number'))['total_price']
-    #     # print(sum_number)
-    #
-    #     # sum_rent = self.to_rent
-    #     # print(sum_rent)
-    #     # s = sum_number - sum_rent
-    #     # print(s)
-    #     # return s/
 
     @classmethod
     def get_default_pk(cls):
@@ -50,24 +35,25 @@ class Address(models.Model):
     def get_sum_all(self):
         address_sum = Address.objects.get(name=self.name)
         device_sum = address_sum.device.all()
+        def item(aa=0, *args):
+                sum_number = []
+
+                for i in args:
+                    for a in i:
+                        for s in a:
+                            sum_number.append(s.number)
+
+                return sum(sum_number)
         if device_sum and not None:
+
             sum_number_list = []
-            for i in device_sum:
-                try:
-                    last, pre_last = i.sensor_set.order_by('-month')[:2]
-                    number_list = (last.number - pre_last.number) * 10
-                    sum_number_list.append(number_list)
-                except ValueError:
-                    try:
-                        last, pre_last = i.sensor_set.last(), 0
-                        number_list = (last.number) * 10
-                        sum_number_list.append(number_list)
-                    except AttributeError:
-                        number_list = 0
-                # print(sum(sum_number), sum_number )
-                sum_number_list.append(number_list)
-            # print(sum(sum_number), sum_number )
-            sum_number = sum(sum_number_list) // 2
+            for dev_sum in device_sum:
+                current_datetime = timezone.now()
+                list_date = dev_sum.sensor_set.filter(month__year=current_datetime.year,
+                                                      month__month=current_datetime.month)
+                sum_number_list.append(list_date)
+            sum_number = item(0, sum_number_list) * 10
+
         else:
             sum_number = 0
         return sum_number
@@ -75,54 +61,37 @@ class Address(models.Model):
     def get_sum_all_sell(self):
         address_sum = Address.objects.get(name=self.name)
         device_sum = address_sum.device.all()
+        def item(aa=0, *args):
+                sum_number = []
+
+                for i in args:
+                    for a in i:
+                        for s in a:
+                            sum_number.append(s.number)
+
+                return sum(sum_number)
         if device_sum and not None:
+
             sum_number_list = []
             for dev_sum in device_sum:
                 current_datetime = timezone.now()
-                list_date = dev_sum.sensor_set.filter(month__year=current_datetime.year, month__month=current_datetime.month)
-                device_list = []
-                for add_list in list_date:
-                    device_list.append(add_list)
-                sum_aq = []
-                for item in device_list:
-                    sum_aq.append(item.number)
-
-                sum_number = sum(sum_aq)
-                print(sum_number, 1)
-            # sum_number = sum(sum_number_list) // 2
-            # sum_number = sum_number - self.to_rent
+                list_date = dev_sum.sensor_set.filter(month__year=current_datetime.year,
+                                                      month__month=current_datetime.month)
+                sum_number_list.append(list_date)
+            sum_number = item(0, sum_number_list)
+            sum_number =sum_number * 10 -self.to_rent
 
         else:
             sum_number = 0
         return sum_number
 
 
-# for i in device_sum:
-#     current_datetime = timezone.now()
-#     l = i.sensor_set.filter(month__year=current_datetime.year, month__month=current_datetime.month)
-#     # print(l, 'Проверка', type(l))
-#     aq = []
-#     for a in l:
-#         aq.append(a)
-#         sum_aq = []+aq
-#         for i in aq:
-#             sum_aq.append(i)
-#             aaa = [sum_aq]
-#     print(aaa)
-
-
-
-
 class Device(models.Model):
     address = models.ForeignKey(Address, on_delete=models.SET_DEFAULT, related_name='device',
                                 default=Address.get_default_pk, verbose_name="Адреса")
     name = models.CharField("Название", blank=True, max_length=150, default='')
-
     def get_sum(self):
         device_sum = Device.objects.get(name=self.name)
-        # last, pre_last = device_sum.sensor_set.order_by('-month')[:2]
-        # # sum_number = device_sum.sensor.aggregate(total_price=Max('number', ))['total_price']
-        # sum_number = (last.number - pre_last.number) * 10
         try:
             last, pre_last = device_sum.sensor_set.order_by('-month')[:2]
             sum_number = (last.number - pre_last.number) * 10
@@ -133,7 +102,18 @@ class Device(models.Model):
             except AttributeError:
                 sum_number = 0
         return sum_number
-
+    def get_sum_win(self):
+        device_sum = Device.objects.get(name=self.name)
+        try:
+            last, pre_last = device_sum.sensor_win_set.order_by('-month')[:2]
+            sum_number = (last.number - pre_last.number)
+        except ValueError:
+            try:
+                last, pre_last = device_sum.sensor_win_set.last(), 0
+                sum_number = (last.number)
+            except AttributeError:
+                sum_number = 0
+        return sum_number
     def get_sell(self):
         device_sum = Device.objects.get(name=self.name)
         try:
@@ -147,49 +127,48 @@ class Device(models.Model):
                 sum = 0
         sum_number = sum - self.address.to_rent
         return sum_number
-
-    # def get_absolute_url(self):
-    #     return reverse('device', kwargs={'post_id': self.pk, 'slug_address': self.address.slug})
     def __str__(self):
         return f'{self.address.name} | {self.name}'
-
-    # queryset = (
-    #     Counter
-    #     .objects
-    #     .values('category__name')
-    #     .annotate(name=F('category__name'))
-    #     .annotate(cnt=Count('id'))
-    #     .order_by('category__name')
-    #     .values('name', 'cnt')
-    # )
-
-
-
     class Meta:
         verbose_name = 'Аппарат'
         verbose_name_plural = 'Аппараты'
 
     def get_absolute_url(self):
-        return reverse('address', kwargs={'slug_name': self.address.slug})
+        return reverse('device', kwargs={'device_id': self.pk})
 
 
 class Sensor(models.Model):
     device = models.ForeignKey(Device, on_delete=models.PROTECT)
-    month = models.DateTimeField('Дата снятия счетчика', default=timezone.now())
+    month = models.DateTimeField('Дата снятия счетчика', auto_now_add=True)
     number = models.IntegerField(verbose_name='Счетчик', default=0)
+
     def get_sum(self):
         sum_number = Device.objects.aggregate(total_price=Count('counter'))['total_price']
         n = sum_number * 10
         return n
+
+    def multiply(self):
+        return self.number * 10
     def __str__(self):
         return f'{self.device.address} | {self.device.name}'
 
-    def get_absolute_url(self):
-        return reverse('home', kwargs={'id': self.id, 'name': self.month})
+    # def get_absolute_url(self):
+    #     return reverse('home', kwargs={'id': self.id})
 
     class Meta:
-        verbose_name = 'Счетчик'
-        verbose_name_plural = 'Счетчики'
+        verbose_name = 'Счетчик игр'
+        verbose_name_plural = 'Счетчики игры'
+class Sensor_win(models.Model):
+    device = models.ForeignKey(Device, on_delete=models.PROTECT)
+    month = models.DateTimeField('Дата снятия счетчика', default=timezone.now())
+    number = models.IntegerField(verbose_name='Счетчик', default=0)
+
+    def __str__(self):
+        return f'{self.device.address} | {self.device.name}'
+
+    class Meta:
+        verbose_name = 'Счетчик выигрыша'
+        verbose_name_plural = 'Счетчики выигрешей'
 
 
 class Expenditure(models.Model):

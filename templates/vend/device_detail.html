@@ -1,0 +1,94 @@
+{% extends 'base.html' %}
+{% block head %}
+
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <script src="https://code.highcharts.com/highcharts.js"></script>
+    <script src="https://code.highcharts.com/modules/exporting.js"></script>
+    <style type="text/css">
+        #container {
+            min-width: 310px;
+            max-width: 800px;
+            height: 400px;
+            margin: 0 auto
+        }
+
+        .container {
+            min-width: 310px;
+            max-width: 800px;
+            height: 400px;
+            margin: 0 auto;
+            text-align: center;
+        }
+    </style>
+{% endblock %}
+{% block content %}
+
+    <div id="container" class="chart_wrap"></div>
+
+    <script type="text/javascript">
+        Highcharts.chart('container', {
+            chart: {
+                type: 'area'
+            },
+            title: {
+                text: 'Таблица счетчиков'
+            },
+            xAxis: {
+                allowDecimals: false,
+                labels: {
+                    formatter: function () {
+                        return this.value; // clean, unformatted number for year
+                    }
+                }
+            },
+            yAxis: {
+                title: {
+                    text: 'Сумма и выигрыши'
+                },
+                labels: {
+                    formatter: function () {
+                        return this.value / 100;
+                    }
+                }
+            },
+            tooltip: {
+                pointFormat: '{series.name} produced <b>{point.y:,.0f}</b><br/>Сумма {point.x}'
+            },
+            plotOptions: {
+                area: {
+                    {% for foo in sensor %}
+                        pointStart: {{ foo.month }},
+                        marker: {
+                            enabled: false,
+                            symbol: 'circle',
+                            radius: 2,
+                            states: {
+                                hover: {
+                                    enabled: true
+                                }
+                            }
+                        }
+                    {% endfor %}
+                }
+            },
+            series: [{
+                name: 'Счетчик денег',
+                data: [
+                    {% for foo in sensor %}
+                        {{ foo.multiply }},
+                    {% endfor %}
+
+                ]
+            }, {
+                name: 'Счетчик выигрыша',
+                data: [{% for foo in sensor_win %}
+                    {{ foo.number }},
+                {% endfor %}
+                ]
+            }]
+        });
+    </script>
+
+{% endblock %}

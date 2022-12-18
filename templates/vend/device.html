@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+{% block content %}
+    <div class="row">
+        <table class="table">
+            <thead>
+            <tr>
+                <th scope="col">Аппарат</th>
+                <th scope="col">Расходы</th>
+                <th scope="col">Доход</th>
+                <th scope="col">Итого</th>
+                <th scope="col">Оплата (нал - без нал)</th>
+            </tr>
+            </thead>
+            <tbody>{{ devices.name }}
+{#            {% for device in devices %}#}
+{#                <tr>#}
+{#                    <th scope="row"><a href="{{ device.get_absolute_url1 }}">{{ device.name }}</a></th>#}
+{#                    <td>{{ device.to_rent }}</td>#}
+{#                    <td> {{ device.get_sum_all }}</td>#}
+{#                    <td>{{ device.get_sum_all_sell }}</td>#}
+{#                    <td>{{ device.payment }}</td>#}
+{##}
+{#                </tr>#}
+{#            {% endfor %}#}
+            </tbody>
+        </table>
+    </div>
+{% endblock %}

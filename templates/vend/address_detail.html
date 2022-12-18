@@ -10,23 +10,21 @@
         <table class="table">
             <thead>
             <tr>
-                <th scope="col">Адрес</th>
-                <th scope="col">Расходы</th>
+                <th scope="col">Аппарат</th>
                 <th scope="col">Доход</th>
                 <th scope="col">Итого</th>
-                <th scope="col">Оплата (нал - без нал)</th>
+{#                <th scope="col">Оплата (нал - без нал)</th>#}
             </tr>
             </thead>
             <tbody>
-
-            {% for addres in address %}
+{##}
+            {% for addres in device %}
                 <tr>
 
                     <th scope="row"><a href="{{ addres.get_absolute_url }}">{{ addres.name }}</a></th>
-                    <td>{{ addres.to_rent }}</td>
-                    <td> {{ addres.get_sum_all }}</td>
-                    <td>{{ addres.get_sum_all_sell }}</td>
-                    <td>{{ addres.payment }}</td>
+                    <td> {{ addres.get_sum }}</td>
+                    <td>{{ addres.get_sum_win }}</td>
+{#                    <td>{{ addres.payment }}</td>#}
                 </tr>
 
 

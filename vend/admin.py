@@ -1,11 +1,15 @@
 from django.contrib import admin
 
-from vend.models import Device, Address, Sensor, Expenditure, AddOptions
+from vend.models import Device, Address, Sensor, Expenditure, AddOptions, Sensor_win
+
 
 class De(admin.TabularInline):
     model = Device
 class Se(admin.TabularInline):
     model = Sensor
+    extra = 0
+class Se_win(admin.TabularInline):
+    model = Sensor_win
     extra = 0
 
 
@@ -25,7 +29,7 @@ class SensorAdmin(admin.ModelAdmin):
 @admin.register(Device)
 class DeviceAdmin(admin.ModelAdmin):
     save_as = True
-    inlines = [Se,]
+    inlines = [Se, Se_win]
 
 @admin.register(Expenditure)
 class ExpenditureAdmin(admin.ModelAdmin):
